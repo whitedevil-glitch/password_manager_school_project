@@ -1,3 +1,3 @@
 # password_manager_school_project
 
-secure passwd manager
+secure password manager with python

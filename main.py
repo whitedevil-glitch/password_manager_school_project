@@ -1,17 +1,9 @@
-from cgi import test
 import sqlite3
 import random
+from getpass import getpass
 
-master_pwd = input("Enter your master-password please: ")
-
-if master_pwd == "123":
-    print("\n succesfully logged in! \n")
-else:
-    print("Invalid!")
-    quit()
 
 # Logo
-
 
 def logo():
 
@@ -29,6 +21,10 @@ def logo():
                           WELCOME :)  
     ''')
 
+def logo2():
+    print('''.▀█▀.█▄█.█▀█.█▄.█.█▄▀　█▄█.█▀█.█─█
+             ─.█.─█▀█.█▀█.█.▀█.█▀▄　─█.─█▄█.█▄█
+        ''')
 
 # SQL CONNECTION AND TABLE CREATION
 conn = sqlite3.connect('passwords.db')
@@ -37,7 +33,7 @@ cursor = conn.cursor()
 
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS users (
-    id INTEGER UNIQUE NOT NULL,
+    id INTEGER PRIMARY KEY,
     service TEXT NOT NULL,
     username TEXT NOT NULL,
     password TEXT NOT NULL,
@@ -81,14 +77,13 @@ def gen():
     ask = input(
         "Would you like to add/save this new password to the database? (yes/no): ")
     if ask == "yes":
-        id1 = int(input("Enter ID Number: "))
         name1 = input("Username to save this password: ")
         serv = input("Enter service: ")
         mai = input("Enter email: ")
         numbe = int(input("Enter phone number: "))
-        sql = """INSERT INTO users  (id, service, username, password, email, phone) 
-                 VALUES (?, ?, ?, ?, ?, ?);"""
-        val = (id1, serv, name1 , password , mai, numbe)
+        sql = """INSERT INTO users  (service, username, password, email, phone) 
+                 VALUES (?, ?, ?, ?, ?);"""
+        val = (serv, name1 , password , mai, numbe)
         cursor.execute(sql, val)
         conn.commit()
     else:
@@ -124,25 +119,34 @@ def search():
     ask = int(input("1. Search with Username, 2. Search with Email, 3. Search with Service (1,2,3): " + "\n"))
     if ask == 1:
         usr1 = input("Enter Username: ")
-        sql1 = ('''select password from users where username = ?;''')
-        val1 = (usr1,)
+        ser = input("Enter Service: ")
+        sql1 = ('''select password from users where username = ? AND service = ?;''')
+        val1 = (usr1, ser, )
         cursor.execute(sql1, val1)
         for (password) in cursor:
-            print("Your Password is: ", password)
+            print('*'*10, "Founded Passwords", '*'*10)
+            print("service: ",ser,"||","username: ", usr1,"||", "Your Password is: ", password)
+            print('*'*10, '*'*10)
     elif ask == 2:
         usr2 = input("Enter Email Address: ")
-        sql2 = ('''select username, password from users where email = ?;''') 
-        val2 = (usr2,)
+        ser = input("Enter Service: ")
+        sql2 = ('''select username, password from users where email = ? AND service = ?;''') 
+        val2 = (usr2, ser, )
         cursor.execute(sql2, val2)
         for (username, password) in cursor:
-            print("Username: " + username + "\npassword: " + password + "\n")
+            print('*'*10, "Founded Passwords", '*'*10)
+            print("service: ",ser,"\nUsername: " + username + "\npassword: " + password + "\n")
+            print('*'*10, '*'*10)
     elif ask == 3:
         usr3 = input("Enter Service: ")
+        # ser = input("Enter Service: ")
         sql3 = ('''select username, password from users where service = ?;''')
-        val3 = (usr3,)
+        val3 = (usr3, )
         cursor.execute(sql3, val3)
         for (username, password) in cursor.fetchall():
-            print("\n" + "Username: " + username + "\npassword: " + password + "\n")
+            print('*'*10, "Founded Passwords", '*'*10)
+            print("service: ", usr3, "\n" + "Username: " + username + "\npassword: " + password + "\n")
+            print('*'*13, '*'*13)
     else:
         print("Not Found!")
 
@@ -163,10 +167,15 @@ def forgot():
 
 def delete():
     ask = input("Enter service: ")
-    removeItem = "DELETE FROM users WHERE service = ? "
-    cursor.execute(removeItem, (ask,))
-    conn.commit()
-    print(cursor.rowcount, "item removed")
+    ask2 = input("Do you want to remove all passwords related to ", ask, " ?(yes/no) : ")
+    if ask2 == "yes":
+        masterPass()
+        removeItem = "DELETE FROM users WHERE service = ? "
+        cursor.execute(removeItem, (ask,))
+        conn.commit()
+        print(cursor.rowcount, "item removed")
+    elif ask2 == "no":
+        ask3 = input("Delete with 1) Username&Pass 2) Phone Number 3) Email : ")
 
 # Update Function
 def update():
@@ -180,9 +189,7 @@ def update():
         cursor.execute(sql, val)
         conn.commit()
         print(" UPDATED !!! ")
-    else:
-        print("Please Check Your Input!")
-    if ask == "usr":
+    elif ask == "usr":
         ask1 = input("enter old username: ")
         ask2 = input("enter new username: ")
         sql = 'update users set username = ? where username = ?;'
@@ -190,9 +197,7 @@ def update():
         cursor.execute(sql, val)
         conn.commit()
         print(" UPDATED !!! ")
-    else:
-        print("Please Check Your Input!")
-    if ask == "service":
+    elif ask == "service":
         ask1 = input("enter username: ")
         ask2 = input("enter new service: ")
         sql = 'update users set service = ? where username = ?;'
@@ -200,9 +205,7 @@ def update():
         cursor.execute(sql, val)
         conn.commit()
         print(" UPDATED !!! ")
-    else:
-        print("Please Check Your Input!")
-    if ask == "password":
+    elif ask == "password":
         ask1 = input("enter username: ")
         ask2 = input("enter new password: ")
         sql = 'update users set password = ? where username = ?;'
@@ -210,9 +213,7 @@ def update():
         cursor.execute(sql, val)
         conn.commit()
         print(" UPDATED !!! ")
-    else:
-        print("Please Check Your Input!")
-    if ask == "email":
+    elif ask == "email":
         ask1 = input("enter username: ")
         ask2 = input("enter new email: ")
         sql = 'update users set email = ? where username = ?;'
@@ -238,7 +239,17 @@ def menu():
     print("|-------------------------------|\n")
 
 
+#masterpass
+def masterPass():
+    mastr_pass = "12345"
+    ask_pass = getpass("Enter Master password: ")
+    if ask_pass == mastr_pass:
+        print("Successfully Logged in! ")
+    else:
+        print("check your password and try again!")
+        exit()
 logo()
+masterPass()
 while True:
     menu()
     opt = int(input("Enter Option"))
@@ -257,7 +268,13 @@ while True:
     elif opt == 7:
         update()
     elif opt == 8:
-        print(r"                                                            ")
-        print(r"THANK YOU FOR USING *THE VAULT* ( Ultimate Password Manager ) ") 
-        print(r"                                                            ")
+        print(r"                                  ")
+        print(r".▀█▀.█▄█.█▀█.█▄.█.█▄▀　█▄█.█▀█.█─█")
+        print(r"─.█.─█▀█.█▀█.█.▀█.█▀▄　─█.─█▄█.█▄█")
+        print(r"                                  ")
+        print(r"                                  ")
+        print(r"THANK YOU FOR USING 𝘁𝗵𝗲 𝘃𝗮𝘂𝗹𝘁 ( Ultimate Password Manager ) ") 
+        print(r"                                  ")
+
         break
+

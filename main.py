@@ -42,6 +42,18 @@ CREATE TABLE IF NOT EXISTS users (
 );
 ''')
 
+#user authentication table creation
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS login (
+    id INTEGER NOT NULL,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    email TEXT,
+    FOREIGN KEY (id) REFERENCES users(id)
+);
+''')
+
+
 # Generating Function
 
 
@@ -157,17 +169,16 @@ def forgot():
     sql = "SELECT phone FROM users WHERE email = ?"
     val = (ask, )
     cursor.execute(sql, val)
-    for (email, phone) in cursor():
-        print("Email: ", email, "Your Recovery Phone Number: ", phone)
+    for phone in cursor():
+        print("Email: ", ask, "Your Recovery Phone Number: ", phone)
     else:
         print("Not Found!")    
 
 # Delete Function
 
-
 def delete():
     ask = input("Enter service: ")
-    ask2 = input("Do you want to remove all passwords related to ", ask, " ?(yes/no) : ")
+    ask2 = input("Do you want to remove all passwords? (yes/no) : ")
     if ask2 == "yes":
         masterPass()
         removeItem = "DELETE FROM users WHERE service = ? "
@@ -175,7 +186,31 @@ def delete():
         conn.commit()
         print(cursor.rowcount, "item removed")
     elif ask2 == "no":
-        ask3 = input("Delete with 1) Username&Pass 2) Phone Number 3) Email : ")
+        ask3 = int(input("Delete with 1) Username&Pass 2) Phone Number 3) Email : "))
+        if ask3 == 1:
+            a = input("Enter Username: ")
+            b = input("Enter Password: ")
+            sql = "DELETE FROM users where username = ? and password = ?"
+            val = (a, b, )
+            cursor.execute(sql,val)
+            conn.commit()
+            print(cursor.rowcount, "item removed")
+        elif ask3 == 2:
+            a = input("Enter Phone Number to delete record: ")
+            sql = "DELETE FROM users WHERE phone = ?"
+            val = (a, )
+            cursor.execute(sql, val)
+            conn.commit()
+            print(cursor.rowcount, "item removed")
+        elif ask3 == 3:
+            a = input("Enter Email Address to delete record: ")
+            sql = "DELETE FROM users WHERE email = ?"
+            val = (a, )
+            cursor.execute(sql, val)
+            conn.commit()
+            print(cursor.rowcount, "item removed")
+        else:
+            print("Try Again")
 
 # Update Function
 def update():
@@ -241,13 +276,22 @@ def menu():
 
 #masterpass
 def masterPass():
-    mastr_pass = "12345"
-    ask_pass = getpass("Enter Master password: ")
-    if ask_pass == mastr_pass:
-        print("Successfully Logged in! ")
+    usr_ask = input("Enter Master Username: ")
+    pass_ask = input("Enter Master Password: ")
+    verify1 = "SELECT username, password FROM login WHERE username = ? AND password = ?;"
+    val = (usr_ask, pass_ask, )
+    cursor.execute(verify1, val)
+    for i in cursor:
+        verify = i
+    if usr_ask in verify:
+        if pass_ask in verify:
+            print("Logged In!!")
+        else:
+            print("Check Your Password Again!")
+            exit()
     else:
-        print("check your password and try again!")
-        exit()
+        print("Check Your Username and Try Again!")
+
 logo()
 masterPass()
 while True:
@@ -277,4 +321,6 @@ while True:
         print(r"                                  ")
 
         break
+
+
 

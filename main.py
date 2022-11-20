@@ -276,21 +276,38 @@ def menu():
 
 #masterpass
 def masterPass():
-    usr_ask = input("Enter Master Username: ")
-    pass_ask = input("Enter Master Password: ")
-    verify1 = "SELECT username, password FROM login WHERE username = ? AND password = ?;"
-    val = (usr_ask, pass_ask, )
-    cursor.execute(verify1, val)
-    for i in cursor:
-        verify = i
-    if usr_ask in verify:
-        if pass_ask in verify:
-            print("Logged In!!")
+    logsi = int(input("1) Login 2) SignUp: "))
+    if logsi == 1:
+        usr_ask = input("Enter Master Username: ")
+        pass_ask = input("Enter Master Password: ")
+        verify1 = "SELECT username, password FROM login WHERE username = ? AND password = ?;"
+        val = (usr_ask, pass_ask, )
+        cursor.execute(verify1, val)
+        for i in cursor:
+            verify = i
+        if usr_ask in verify:
+            if pass_ask in verify:
+                print("Logged In!!")
+            else:
+                print("Check Your Password Again!")
+                exit()
         else:
-            print("Check Your Password Again!")
-            exit()
+            print("Check Your Username and Try Again!")
+    elif logsi == 2:
+        id_ask = int(input("Enter ID (ASK ADMIN): "))
+        usr_ask = input("Enter your new username: ")
+        pass_ask = input("Enter your new Master Password: ")
+        conf_pass = input("Confirm your Master Password: ")
+        if conf_pass == pass_ask:
+            email_ask = input("Enter your recovery email address: ")
+            sql = "INSERT INTO login (id, username, password, email) VALUES (?,?,?,?)"
+            val = (id_ask, usr_ask, conf_pass, email_ask, )
+            cursor.execute(sql, val)
+            print("Added user to Database! Now you can LogIn!")
+        else:
+            print("Check your Confirmation Password and Try Again!")
     else:
-        print("Check Your Username and Try Again!")
+        print("Error!")
 
 logo()
 masterPass()

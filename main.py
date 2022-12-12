@@ -1,6 +1,6 @@
 import sqlite3
 import random
-from getpass import getpass
+
 
 
 # Logo
@@ -45,11 +45,9 @@ CREATE TABLE IF NOT EXISTS users (
 #user authentication table creation
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS login (
-    id INTEGER NOT NULL,
     username TEXT NOT NULL,
     password TEXT NOT NULL,
-    email TEXT,
-    FOREIGN KEY (id) REFERENCES users(id)
+    email TEXT
 );
 ''')
 
@@ -169,10 +167,10 @@ def forgot():
     sql = "SELECT phone FROM users WHERE email = ?"
     val = (ask, )
     cursor.execute(sql, val)
-    for phone in cursor():
+    for phone in cursor:
         print("Email: ", ask, "Your Recovery Phone Number: ", phone)
     else:
-        print("Not Found!")    
+        print("......")    
 
 # Delete Function
 
@@ -294,26 +292,25 @@ def masterPass():
         else:
             print("Check Your Username and Try Again!")
     elif logsi == 2:
-        id_ask = int(input("Enter ID (ASK ADMIN): "))
         usr_ask = input("Enter your new username: ")
         pass_ask = input("Enter your new Master Password: ")
         conf_pass = input("Confirm your Master Password: ")
         if conf_pass == pass_ask:
             email_ask = input("Enter your recovery email address: ")
-            sql = "INSERT INTO login (id, username, password, email) VALUES (?,?,?,?)"
-            val = (id_ask, usr_ask, conf_pass, email_ask, )
+            sql = "INSERT INTO login (username, password, email) VALUES ('?','?','?')"
+            val = (usr_ask, conf_pass, email_ask, )
             cursor.execute(sql, val)
-            print("Added user to Database! Now you can LogIn!")
+            print("Added user to Database! Now you can Log In!")
         else:
             print("Check your Confirmation Password and Try Again!")
     else:
         print("Error!")
 
 logo()
-masterPass()
+
 while True:
     menu()
-    opt = int(input("Enter Option"))
+    opt = int(input("Enter Option: "))
     if opt == 1:
         gen()
     elif opt == 2:
